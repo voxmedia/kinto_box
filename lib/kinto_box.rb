@@ -49,6 +49,10 @@ module KintoBox
       ResponseHandler.handle self.class.post(path, :body => data.to_json)
     end
 
+    def delete(path)
+      ResponseHandler.handle self.class.delete(path)
+    end
+
     def get(path)
       ResponseHandler.handle self.class.get(path)
     end
