@@ -1,6 +1,6 @@
 require "kinto_box/version"
 require 'httparty'
-require 'api_errors'
+require 'response_handler'
 
 module KintoBox
   class KintoClient
