@@ -31,10 +31,14 @@ class KintoBoxTest < Minitest::Test
     assert resp['data'].count > 1
   end
 
-  def test_create_bucket
+  def test_create_delete_bucket
     random_name = random_string
     bucket = default_kinto_client.create_bucket(random_name)
     assert_equal bucket.info['data']['id'], random_name
+    bucket.delete
+    assert_raises KintoBox::NotAuthorized do
+       bucket.info
+    end
   end
 
   def test_get_bucket_info
