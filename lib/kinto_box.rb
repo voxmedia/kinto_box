@@ -40,6 +40,10 @@ module KintoBox
       put "/buckets/#{bucket_id}"
       bucket(bucket_id)
     end
+    
+    def delete_buckets
+      delete '/buckets'
+    end
 
     def put(path, data = {})
       ResponseHandler.handle self.class.put(path, :body => data.to_json)
