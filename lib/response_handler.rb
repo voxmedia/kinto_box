@@ -23,6 +23,9 @@ module KintoBox
   # Raised when the requested thing is not found
   class NotFound < Error; end
 
+  # Raised when the user is not authorized
+  class NotAuthorized < Error; end
+
   # Raised when there is some sort of error on the server
   class ServerError < Error; end
 
@@ -38,6 +41,8 @@ module KintoBox
         raise NotFound, resp
       elsif resp.code == 401
         raise NotAllowed, resp
+      elsif resp.code == 403
+        raise NotAuthorized, resp
       elsif resp.code >= 500
         raise ServerError, resp
       else
