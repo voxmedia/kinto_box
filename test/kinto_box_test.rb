@@ -28,14 +28,20 @@ class KintoBoxTest < Minitest::Test
 
   def test_list_buckets
     resp = default_kinto_client.list_buckets
-    # make a more reliable assertion
-    assert_equal resp['data'][0]['id'], 'TestBucket1'
+    assert resp['data'].count > 1
+  end
+
+  def test_create_bucket
+    random_name = ('a'..'z').to_a.shuffle[0,8].join
+    bucket = default_kinto_client.create_bucket(random_name)
+    assert_equal bucket.info['data']['id'], random_name
   end
 
   def test_get_bucket_info
     bucket = default_kinto_client.bucket('TestBucket1').info
     assert_equal bucket['data']['id'], 'TestBucket1'
   end
+
 
   private
 
