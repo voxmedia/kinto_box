@@ -6,15 +6,14 @@ class KintoBoxTest < Minitest::Test
   end
 
   def test_get_server_info
-    kinto_client = default_kinto_client
-    resp = kinto_client.serverInfo
+    resp = default_kinto_client.server_info
     assert_equal resp['project_name'], 'kinto'
     assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
   end
 
   def test_get_server_info_w_auth
     kinto_client = KintoBox::KintoClient.new(KINTO_SERVER, {:username => 'token', :password => 'my-secret'})
-    resp = kinto_client.serverInfo
+    resp = kinto_client.server_info
     assert_equal resp['project_name'], 'kinto'
     assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
   end
@@ -23,8 +22,14 @@ class KintoBoxTest < Minitest::Test
     kinto_client = KintoBox::KintoClient.new('http://kavyasukumar.com')
 
     assert_raises KintoBox::NotFound do
-      resp = kinto_client.serverInfo
+      resp = kinto_client.server_info
     end
+  end
+
+  def test_list_buckets
+    resp = default_kinto_client.list_buckets
+    # make a more reliable assertion
+    assert_equal resp['data'][0]['id'], 'TestBucket1'
   end
 
   def test_get_bucket_info

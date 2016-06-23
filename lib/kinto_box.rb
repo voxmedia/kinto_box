@@ -31,7 +31,9 @@ module KintoBox
       get '/'
     end
 
-    def
+    def list_buckets
+      get '/buckets'
+    end
 
     def get(path)
       ResponseHandler.handle self.class.get(path)
