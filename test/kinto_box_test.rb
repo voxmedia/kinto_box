@@ -6,14 +6,14 @@ class KintoBoxTest < Minitest::Test
   end
 
   def test_get_server_info
-    kinto_client = KintoBox::KintoClient.new('https://kintobox.herokuapp.com', nil)
+    kinto_client = default_kinto_client
     resp = kinto_client.serverInfo
     assert_equal resp['project_name'], 'kinto'
     assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
   end
 
   def test_get_server_info_w_auth
-    kinto_client = KintoBox::KintoClient.new('https://kintobox.herokuapp.com', {:username => 'test', :password => 'my-secret'})
+    kinto_client = KintoBox::KintoClient.new(KINTO_SERVER, {:username => 'token', :password => 'my-secret'})
     resp = kinto_client.serverInfo
     assert_equal resp['project_name'], 'kinto'
     assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
@@ -25,6 +25,17 @@ class KintoBoxTest < Minitest::Test
     assert_raises KintoBox::NotFound do
       resp = kinto_client.serverInfo
     end
+  end
+
+  def test_get_bucket_info
+    bucket = default_kinto_client.bucket('TestBucket1').info
+    assert_equal bucket['data']['id'], 'TestBucket1'
+  end
+
+  private
+
+  def default_kinto_client
+    KintoBox::KintoClient.new(KINTO_SERVER)
   end
 end
 
