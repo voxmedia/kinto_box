@@ -32,7 +32,7 @@ class KintoBoxTest < Minitest::Test
   end
 
   def test_create_bucket
-    random_name = ('a'..'z').to_a.shuffle[0,8].join
+    random_name = random_string
     bucket = default_kinto_client.create_bucket(random_name)
     assert_equal bucket.info['data']['id'], random_name
   end
