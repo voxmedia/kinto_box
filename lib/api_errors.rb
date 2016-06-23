@@ -26,4 +26,25 @@ module KintoBox
   # Raised when there is some sort of error on the server
   class ServerError < Error; end
 
+  class ResponseHandler
+    def self.handle(resp)
+      if [200, 201].include? resp.code
+        JSON.parse resp.body
+      elsif [202, 204].include? resp.code
+        true
+      elsif resp.code == 400
+        raise BadRequest, resp
+      elsif resp.code == 404
+        raise NotFound, resp
+      elsif resp.code == 401
+        raise NotAllowed, resp
+      elsif resp.code >= 500
+        raise ServerError, resp
+      else
+        raise Error, resp
+      end
+    end
+
+  end
+
 end
