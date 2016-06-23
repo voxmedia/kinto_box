@@ -31,8 +31,22 @@ module KintoBox
       get '/'
     end
 
+    # buckets
     def list_buckets
       get '/buckets'
+    end
+
+    def create_bucket(bucket_id)
+      put "/buckets/#{bucket_id}"
+      bucket(bucket_id)
+    end
+
+    def put(path, data = {})
+      ResponseHandler.handle self.class.put(path, :body => data.to_json)
+    end
+
+    def post(path, data = {})
+      ResponseHandler.handle self.class.post(path, :body => data.to_json)
     end
 
     def get(path)
