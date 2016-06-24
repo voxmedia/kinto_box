@@ -111,6 +111,14 @@ class KintoBoxTest < Minitest::Test
     record.delete
   end
 
+  def test_change_collection_read_permission
+    collection_name = random_string
+    collection = test_bucket.create_collection(collection_name)
+    collection.add_permission('everyone','read')
+    assert_equal collection.permission['read'], ['system.Everyone']
+    collection.delete
+  end
+
 
   private
 
