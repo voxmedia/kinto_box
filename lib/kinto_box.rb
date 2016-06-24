@@ -31,6 +31,10 @@ module KintoBox
       get '/'
     end
 
+    def current_user_id
+      server_info['user']['id']
+    end
+
     # buckets
     def list_buckets
       get '/buckets'
