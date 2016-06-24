@@ -46,11 +46,29 @@ class KintoBoxTest < Minitest::Test
     assert_equal bucket['data']['id'], 'TestBucket1'
   end
 
+  def test_create_delete_collection
+    collection_id = random_string
+    collection = test_bucket.create_collection(collection_id)
+    assert_equal collection.info['data']['id'], collection_id
+    collection.delete
+    assert_raises KintoBox::NotFound do
+      collection.info
+    end
+  end
+
+  def test_get_collection_info
+    collection = test_bucket.collection('TestCollection1').info
+    assert_equal collection['data']['id'], 'TestCollection1'
+  end
 
   private
 
   def default_kinto_client
     KintoBox::KintoClient.new(KINTO_SERVER)
+  end
+
+  def test_bucket
+    default_kinto_client.bucket('TestBucket1')
   end
 end
 
