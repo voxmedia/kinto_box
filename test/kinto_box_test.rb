@@ -61,6 +61,13 @@ class KintoBoxTest < Minitest::Test
     assert_equal collection['data']['id'], 'TestCollection1'
   end
 
+  def test_update_collection
+    value = random_string
+    collection = test_bucket.collection('TestCollection1')
+    collection.update({'property1' => value })
+    assert_equal collection.info['data']['property1'], value
+  end
+
   private
 
   def default_kinto_client
