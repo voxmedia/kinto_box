@@ -1,6 +1,12 @@
 require 'test_helper'
 
 class KintoBoxTest < Minitest::Test
+  def setup
+    default_kinto_client.create_bucket('TestBucket1')
+    test_bucket.create_collection('TestCollection1')
+    test_collection.create_record({'foo' => 'testval'})
+  end
+
   def test_that_it_has_a_version_number
     refute_nil ::KintoBox::VERSION
   end
@@ -8,14 +14,14 @@ class KintoBoxTest < Minitest::Test
   def test_get_server_info
     resp = default_kinto_client.server_info
     assert_equal resp['project_name'], 'kinto'
-    assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
+    assert_equal resp['url'], URI.join(KINTO_SERVER, '/v1/').to_s
   end
 
   def test_get_server_info_w_auth
     kinto_client = KintoBox::KintoClient.new(KINTO_SERVER, {:username => 'token', :password => 'my-secret'})
     resp = kinto_client.server_info
     assert_equal resp['project_name'], 'kinto'
-    assert_equal resp['url'], 'https://kintobox.herokuapp.com/v1/'
+    assert_equal resp['url'], URI.join(KINTO_SERVER, '/v1/').to_s
   end
 
   def test_non_existent_server
@@ -28,7 +34,7 @@ class KintoBoxTest < Minitest::Test
 
   def test_list_buckets
     resp = default_kinto_client.list_buckets
-    assert resp['data'].count > 1
+    assert resp['data'].count >= 1
   end
 
   def test_create_delete_bucket

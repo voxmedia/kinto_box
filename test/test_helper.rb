@@ -3,7 +3,7 @@ require 'minitest/autorun'
 require 'kinto_box'
 require 'response_handler'
 
-KINTO_SERVER = 'https://kintobox.herokuapp.com'
+KINTO_SERVER = 'https://kinto.dev.mozaws.net'
 
 def random_string (n = 8)
   [*('a'..'z'),*('0'..'9')].to_a.shuffle[0,n].join
