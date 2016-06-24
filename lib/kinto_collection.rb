@@ -14,5 +14,9 @@ module KintoBox
     def delete
       @kinto_client.delete(@url_path)
     end
+
+    def update(data)
+      @kinto_client.patch(@url_path, {'data' => data})
+    end
   end
 end

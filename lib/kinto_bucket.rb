@@ -25,6 +25,10 @@ module KintoBox
       @kinto_client.delete(@url_path)
     end
 
+    def update(data)
+      @kinto_client.patch(@url_path, {'data' => data})
+    end
+
     def create_collection(collection_id)
       @kinto_client.post("#{@url_path}/collections", { 'data' => { 'id' => collection_id}})
       collection(collection_id)
