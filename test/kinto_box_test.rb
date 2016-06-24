@@ -68,6 +68,44 @@ class KintoBoxTest < Minitest::Test
     assert_equal collection.info['data']['property1'], value
   end
 
+  def test_create_delete_record
+    value = random_string
+    record = test_collection.create_record({'foo' => value})
+    assert_equal record.info['data']['foo'], value
+    record.delete
+  end
+
+  def test_get_all_records
+    resp = test_collection.list_records
+    assert resp['data'].count >= 1
+  end
+
+  def test_create_update_record
+    value = random_string
+    record = test_collection.create_record({'foo' => value})
+    assert_equal record.info['data']['foo'], value
+
+    new_value = random_string
+    record.update({'bar' => new_value})
+    assert_equal record.info['data']['foo'], value
+    assert_equal record.info['data']['bar'], new_value
+
+    record.delete
+  end
+
+  def test_create_replace_record
+    value = random_string
+    record = test_collection.create_record({'foo' => value})
+    assert_equal record.info['data']['foo'], value
+
+    new_value = random_string
+    record.replace({'foo' => new_value})
+    assert_equal record.info['data']['foo'], new_value
+
+    record.delete
+  end
+
+
   private
 
   def default_kinto_client
@@ -76,6 +114,10 @@ class KintoBoxTest < Minitest::Test
 
   def test_bucket
     default_kinto_client.bucket('TestBucket1')
+  end
+
+  def test_collection
+    test_bucket.collection('TestCollection1')
   end
 end
 
