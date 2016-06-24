@@ -1,6 +1,9 @@
 require 'kinto_record'
+require 'kinto_object'
 module KintoBox
   class KintoCollection
+    include KintoObject
+
     attr_accessor :id
     attr_reader :bucket
 
@@ -10,18 +13,6 @@ module KintoBox
       @bucket = bucket
       @id = collection_id
       @url_path = "/buckets/#{bucket.id}/collections/#{@id}"
-    end
-
-    def info
-      @kinto_client.get(@url_path)
-    end
-
-    def delete
-      @kinto_client.delete(@url_path)
-    end
-
-    def update(data)
-      @kinto_client.patch(@url_path, {'data' => data})
     end
 
     def record (record_id, return_ref = false)

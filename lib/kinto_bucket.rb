@@ -1,6 +1,9 @@
 require 'kinto_collection'
+require 'kinto_object'
 module KintoBox
   class KintoBucket
+    include KintoObject
+
     attr_accessor :id
     attr_reader :kinto_client
 
@@ -15,18 +18,6 @@ module KintoBox
     def collection (collection_id)
       @collection = KintoCollection.new(self, collection_id)
       @collection
-    end
-
-    def info
-      @kinto_client.get(@url_path)
-    end
-
-    def delete
-      @kinto_client.delete(@url_path)
-    end
-
-    def update(data)
-      @kinto_client.patch(@url_path, {'data' => data})
     end
 
     def create_collection(collection_id)
