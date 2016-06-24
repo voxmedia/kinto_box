@@ -1,6 +1,6 @@
 # Kinto Box
 
-Kinto Box is a ruby client for [Kinto](kinto.readthedocs.io)
+Kinto Box is a ruby client for [Kinto](http://:kinto.readthedocs.io)
 
 ## Installation
 
