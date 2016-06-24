@@ -40,7 +40,7 @@ module KintoBox
       put "/buckets/#{bucket_id}"
       bucket(bucket_id)
     end
-    
+
     def delete_buckets
       delete '/buckets'
     end
