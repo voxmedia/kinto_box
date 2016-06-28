@@ -1,4 +1,4 @@
-require 'kinto_object'
+require 'kinto_box/kinto_object'
 module KintoBox
   class KintoRecord
     include KintoObject

@@ -1,5 +1,5 @@
-require 'kinto_collection'
-require 'kinto_object'
+require 'kinto_box/kinto_collection'
+require 'kinto_box/kinto_object'
 module KintoBox
   class KintoBucket
     include KintoObject

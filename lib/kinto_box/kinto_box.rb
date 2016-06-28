@@ -1,7 +1,7 @@
 require "kinto_box/version"
 require 'httparty'
-require 'response_handler'
-require 'kinto_bucket'
+require 'kinto_box/response_handler'
+require 'kinto_box/kinto_bucket'
 require 'base64'
 
 module KintoBox

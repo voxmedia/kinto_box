@@ -115,7 +115,7 @@ class KintoBoxTest < Minitest::Test
     collection_name = random_string
     collection = test_bucket.create_collection(collection_name)
     collection.add_permission('everyone','read')
-    assert_equal collection.permission['read'], ['system.Everyone']
+    assert_equal collection.permissions['read'], ['system.Everyone']
     collection.delete
   end
 

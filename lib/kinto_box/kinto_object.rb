@@ -22,7 +22,7 @@ module KintoBox
       return self
     end
 
-    def permission
+    def permissions
       info['permissions']
     end
 
