@@ -1,4 +1,4 @@
-# Kinto Box
+# Kinto Box [![Gem Version](https://badge.fury.io/rb/kinto_box.svg)](https://badge.fury.io/rb/kinto_box)
 
 Kinto Box is a ruby client for [Kinto](http://:kinto.readthedocs.io)
 
