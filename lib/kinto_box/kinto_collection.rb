@@ -31,5 +31,9 @@ module KintoBox
       record_id = resp['data']['id']
       record(record_id, true)
     end
+
+    def delete_records
+      @kinto_client.delete("#{@url_path}/records")
+    end
   end
 end
