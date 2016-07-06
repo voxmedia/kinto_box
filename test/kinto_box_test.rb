@@ -4,6 +4,7 @@ class KintoBoxTest < Minitest::Test
   def setup
     default_kinto_client.create_bucket('TestBucket1')
     test_bucket.create_collection('TestCollection1')
+    test_collection.delete_records
     test_collection.create_record({'foo' => 'testval'})
   end
 
@@ -117,6 +118,20 @@ class KintoBoxTest < Minitest::Test
     collection.add_permission('everyone','read')
     assert_equal collection.permissions['read'], ['system.Everyone']
     collection.delete
+  end
+
+  def test_delete_all_collections
+    test_bucket.create_collection(random_string)
+    test_bucket.create_collection(random_string)
+    test_bucket.delete_collections
+    assert_empty test_bucket.list_collections['data']
+  end
+
+  def test_delete_all_records
+    test_collection.create_record({'foo' => random_string})
+    test_collection.create_record({'foo' => random_string})
+    test_collection.delete_records
+    assert_empty test_collection.list_records['data']
   end
 
 
