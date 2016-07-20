@@ -49,6 +49,11 @@ class KintoBoxTest < Minitest::Test
     end
   end
 
+  def test_bucket_exists
+    assert test_bucket.exists?
+    assert !default_kinto_client.bucket('nonexistent').exists?
+  end
+
   def test_get_bucket_info
     bucket = default_kinto_client.bucket('TestBucket1').info
     assert_equal bucket['data']['id'], 'TestBucket1'
@@ -62,6 +67,11 @@ class KintoBoxTest < Minitest::Test
     assert_raises KintoBox::NotFound do
       collection.info
     end
+  end
+
+  def test_collection_exists
+    assert test_collection.exists?
+    assert !test_bucket.collection('nonexistent').exists?
   end
 
   def test_get_collection_info

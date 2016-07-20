@@ -12,6 +12,15 @@ module KintoBox
       @kinto_client.patch(@url_path, {'data' => data})
     end
 
+    def exists?
+      begin
+        info
+      rescue
+        return false
+      end
+      true
+    end
+
     def add_permission(principal, permission)
       @kinto_client.patch(@url_path, {'permissions' => { permission_name(permission) => [principal_name(principal)] }})
       return self
