@@ -37,6 +37,8 @@ module KintoBox
         when 'create'
           return 'collection:create' if self.kind_of? KintoBucket
           return 'record:create' if self.kind_of? KintoCollection
+        when 'group:create'
+          return 'group:create'
         else
           raise Exception 'not a valid permission'
       end

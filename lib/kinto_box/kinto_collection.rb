@@ -1,6 +1,6 @@
 require 'kinto_box/kinto_record'
 require 'kinto_box/kinto_object'
-require 'kinto_box/kinto_object'
+
 module KintoBox
   class KintoCollection
     include KintoObject

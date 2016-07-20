@@ -4,6 +4,7 @@ class KintoBoxTest < Minitest::Test
   def setup
     default_kinto_client.create_bucket('TestBucket1')
     test_bucket.create_collection('TestCollection1')
+    test_bucket.create_group('TestGroup1', 'TestUser1')
     test_collection.delete_records
     test_collection.create_record({'foo' => 'testval'})
   end
@@ -134,6 +135,23 @@ class KintoBoxTest < Minitest::Test
     assert_empty test_collection.list_records['data']
   end
 
+  def test_create_delete_group
+    group_name = random_string
+    member = random_string
+    group = test_bucket.create_group(group_name, member)
+    assert_equal group.info['data']['id'], group_name
+    assert_equal group.info['data']['members'][0], member
+    group.delete
+  end
+
+  def test_add_remove_group_member
+    user = random_string
+    test_group.add_member(user)
+    assert test_group.info['data']['members'].include? user
+    test_group.remove_member(user)
+    assert !test_group.info['data']['members'].include?(user)
+  end
+
 
   private
 
@@ -147,6 +165,10 @@ class KintoBoxTest < Minitest::Test
 
   def test_collection
     test_bucket.collection('TestCollection1')
+  end
+
+  def test_group
+    test_bucket.group('TestGroup1')
   end
 end
 
