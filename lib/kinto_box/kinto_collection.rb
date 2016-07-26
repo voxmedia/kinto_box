@@ -22,8 +22,13 @@ module KintoBox
       record.info
     end
 
-    def list_records
-      @kinto_client.get("#{@url_path}/records")
+    def list_records(filters = nil, sort = nil)
+      query_string = '?'
+      query_string += filters unless filters.nil?
+      query_string += '&' unless filters.nil? || sort.nil?
+      query_string += "_sort=#{sort}" unless sort.nil?
+      path = query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
+      @kinto_client.get(path)
     end
 
     def create_record(data)
