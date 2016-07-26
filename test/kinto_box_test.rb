@@ -20,14 +20,14 @@ class KintoBoxTest < Minitest::Test
   end
 
   def test_get_server_info_w_auth
-    kinto_client = KintoBox::KintoClient.new(KINTO_SERVER, {:username => 'token', :password => 'my-secret'})
+    kinto_client = KintoBox.new(KINTO_SERVER, {:username => 'token', :password => 'my-secret'})
     resp = kinto_client.server_info
     assert_equal resp['project_name'], 'kinto'
     assert_equal resp['url'], URI.join(KINTO_SERVER, '/v1/').to_s
   end
 
   def test_non_existent_server
-    kinto_client = KintoBox::KintoClient.new('http://kavyasukumar.com')
+    kinto_client = KintoBox.new('http://kavyasukumar.com')
 
     assert_raises KintoBox::NotFound do
       resp = kinto_client.server_info
@@ -162,11 +162,34 @@ class KintoBoxTest < Minitest::Test
     assert !test_group.info['data']['members'].include?(user)
   end
 
+  def test_filter_records
+    foo_val = random_string
+    test_collection.create_record({'foo' => foo_val})
+    records = test_collection.list_records("foo=#{foo_val}")
+    assert_equal records.length, 1
+    assert_equal records['data'][0]['foo'], foo_val
+  end
+
+  def test_sort_records
+    record1 = test_collection.create_record({'val' => 10})
+    record2 = test_collection.create_record({'val' => 11})
+    records = test_collection.list_records(nil,"val")
+    assert_equal records['data'][0]['val'], 10
+    assert_equal records['data'][1]['val'], 11
+
+    # descending sort and filter
+    records = test_collection.list_records('min_val=10','-val')
+    assert_equal records['data'][0]['val'], 11
+    assert_equal records['data'][1]['val'], 10
+    record1.delete
+    record2.delete
+  end
+
 
   private
 
   def default_kinto_client
-    KintoBox::KintoClient.new(KINTO_SERVER)
+    KintoBox.new(KINTO_SERVER)
   end
 
   def test_bucket
