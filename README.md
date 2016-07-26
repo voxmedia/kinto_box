@@ -28,7 +28,7 @@ To use kinto_box, add `require 'kinto_box'` to your file.
 To connect to a kinto server, you can pass the username and password to the client
 
 ```
-kinto_client = KintoBox::KintoClient.new('https://kinto.dev.mozaws.net', {:username => 'token', :password => 'my-secret'})
+kinto_client = KintoBox.new('https://kinto.dev.mozaws.net', {:username => 'token', :password => 'my-secret'})
 ```
 
 If no credentials are passed, the gem looks for `KINTO_API_TOKEN` environment variable. The environment variable should store the Base64 encoding of `username:password` string, for this to work.
@@ -105,7 +105,7 @@ To connect to a collection named `TestCollection`
 collection = bucket.collection('TestCollection')
 ```
 
-> Note: This does not create the collectiont nor check if the collection exists on the server.
+> Note: This does not create the collection nor check if the collection exists on the server.
 
 To check if the collection exists use
 
@@ -142,6 +142,14 @@ To read from the collection
 ```
 records = collection.list_records
 ```
+
+List records support filtering and sorting. It follows the convention described [here](http://kinto.readthedocs.io/en/stable/api/1.x/filtering.html) and [here](http://kinto.readthedocs.io/en/stable/api/1.x/sorting.html).
+
+```
+records = collection.list_records('min_val=10','val')
+```
+
+The above line will return all records where `val` is at least 10 and sorted ascending on the field `val`
 
 To delete all records from the collection
 
