@@ -31,9 +31,5 @@ module KintoBox
       members.delete(member)
       update({ 'members' => members })
     end
-
-    def delete_records
-      @kinto_client.delete("#{@url_path}/records")
-    end
   end
 end

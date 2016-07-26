@@ -22,12 +22,12 @@ module KintoBox
     end
 
     def add_permission(principal, permission)
-      @kinto_client.patch(@url_path, {'permissions' => { permission_name(permission) => [principal_name(principal)] }})
+      @kinto_client.patch(@url_path, {'permissions' => { permission => [principal_name(principal)] }})
       return self
     end
 
     def replace_permission(principal, permission)
-      @kinto_client.put(@url_path, {'permissions' => { permission_name(permission) => [principal_name(principal)] }})
+      @kinto_client.put(@url_path, {'permissions' => { permission => [principal_name(principal)] }})
       return self
     end
 
@@ -36,22 +36,6 @@ module KintoBox
     end
 
     private
-
-    def permission_name(permission)
-      case permission.downcase
-        when 'read'
-          return 'read'
-        when 'write'
-          return 'write'
-        when 'create'
-          return 'collection:create' if self.kind_of? KintoBucket
-          return 'record:create' if self.kind_of? KintoCollection
-        when 'group:create'
-          return 'group:create'
-        else
-          raise Exception 'not a valid permission'
-      end
-    end
 
     def principal_name(principal)
       case principal.downcase
