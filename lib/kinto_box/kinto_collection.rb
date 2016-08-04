@@ -16,11 +16,11 @@ module KintoBox
       @url_path = "/buckets/#{bucket.id}/collections/#{@id}"
     end
 
-    def record (record_id, return_ref = false)
+    def record (record_id)
       record = KintoRecord.new(self, record_id)
-      return record if return_ref
-      record.info
+      record
     end
+
 
     def list_records(filters = nil, sort = nil)
       query_string = '?'
@@ -34,7 +34,7 @@ module KintoBox
     def create_record(data)
       resp = @kinto_client.post("#{@url_path}/records", { 'data' => data})
       record_id = resp['data']['id']
-      record(record_id, true)
+      record(record_id)
     end
 
     def delete_records
