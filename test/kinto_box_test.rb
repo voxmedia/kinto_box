@@ -98,6 +98,23 @@ class KintoBoxTest < Minitest::Test
     assert resp['data'].count >= 1
   end
 
+  def test_get_records_count
+    count = test_collection.get_records_count
+    resp = test_collection.list_records
+    assert resp['data'].count == count
+  end
+
+  def test_get_records_count_filtered
+    foo_val = random_string
+    test_collection.create_record({'foo' => foo_val})
+    test_collection.create_record({'foo' => foo_val})
+    foo_val_2 = random_string
+    test_collection.create_record({'foo' => foo_val_2})
+    count = test_collection.get_records_count("foo=#{foo_val}")
+    records = test_collection.list_records("foo=#{foo_val}")
+    assert records['data'].count == count
+  end
+
   def test_create_update_record
     value = random_string
     record = test_collection.create_record({'foo' => value})

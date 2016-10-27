@@ -50,6 +50,12 @@ module KintoBox
       end
     end
 
+    def self.get_response_head(resp)
+      if [200, 201].include? resp.code
+        resp.headers
+      else
+        raise BadRequest, resp
+      end
+    end
   end
-
 end

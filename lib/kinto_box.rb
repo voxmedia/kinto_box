@@ -128,5 +128,14 @@ module KintoBox
     def get(path)
       ResponseHandler.handle self.class.get(path)
     end
+
+    # Calls http HEAD on path
+    #
+    # @params [String]path Url path
+    # @params [Hash] data to be sent in the body
+    # @return [Hash] response body
+    def head(path, data = {})
+      ResponseHandler.get_response_head self.class.head(path)
+    end
   end
 end

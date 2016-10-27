@@ -40,5 +40,12 @@ module KintoBox
     def delete_records
       @kinto_client.delete("#{@url_path}/records")
     end
+
+    def get_records_count(filters = nil)
+      query_string = '?'
+      query_string += filters unless filters.nil?
+      path = query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
+      @kinto_client.head(path)['Total-Records'].to_i
+    end
   end
 end
