@@ -23,13 +23,10 @@ module KintoBox
 
 
     def list_records(filters = nil, sort = nil)
-      query_string = '?'
-      query_string += filters unless filters.nil?
-      query_string += '&' unless filters.nil? || sort.nil?
-      query_string += "_sort=#{sort}" unless sort.nil?
-      path = query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
-      @kinto_client.get(path)
+      @kinto_client.get(url_w_qsp(filters, sort))
     end
+
+
 
     def create_record(data)
       resp = @kinto_client.post("#{@url_path}/records", { 'data' => data})
@@ -41,11 +38,21 @@ module KintoBox
       @kinto_client.delete("#{@url_path}/records")
     end
 
-    def get_records_count(filters = nil)
+    def delete_records(filters = nil)
+      @kinto_client.delete(url_w_qsp(filters))
+    end
+
+    def count_records(filters = nil)
+      @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
+    end
+
+    private
+    def url_w_qsp(filters = nil, sort = nil)
       query_string = '?'
       query_string += filters unless filters.nil?
-      path = query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
-      @kinto_client.head(path)['Total-Records'].to_i
+      query_string += '&' unless filters.nil? || sort.nil?
+      query_string += "_sort=#{sort}" unless sort.nil?
+      query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
     end
   end
 end
