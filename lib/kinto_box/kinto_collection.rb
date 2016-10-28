@@ -34,13 +34,11 @@ module KintoBox
       record(record_id)
     end
 
+
     def delete_records
       @kinto_client.delete("#{@url_path}/records")
     end
 
-    def delete_records(filters = nil)
-      @kinto_client.delete(url_w_qsp(filters))
-    end
 
     def count_records(filters = nil)
       @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
