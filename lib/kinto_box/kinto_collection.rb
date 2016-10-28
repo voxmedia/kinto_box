@@ -35,8 +35,8 @@ module KintoBox
     end
 
 
-    def delete_records
-      @kinto_client.delete("#{@url_path}/records")
+    def delete_records(filters = nil)
+      @kinto_client.delete(url_w_qsp(filters))
     end
 
 

@@ -98,7 +98,7 @@ class KintoBoxTest < Minitest::Test
     assert resp['data'].count >= 1
   end
 
-  def test_get_records_count
+  def test_count_records
     count = test_collection.count_records
     resp = test_collection.list_records
     assert resp['data'].count == count
@@ -160,6 +160,15 @@ class KintoBoxTest < Minitest::Test
     test_collection.create_record({'foo' => random_string})
     test_collection.delete_records
     assert_empty test_collection.list_records['data']
+  end
+
+  def test_filtered_delete
+    foo_val = random_string
+    test_collection.create_record({'foo' => foo_val})
+    test_collection.create_record({'foo' => foo_val})
+
+    test_collection.delete_records("foo=#{foo_val}")
+    assert_equal 0, test_collection.count_records("foo=#{foo_val}")
   end
 
   def test_create_delete_group
