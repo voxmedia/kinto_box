@@ -84,6 +84,37 @@ module KintoBox
       delete '/buckets'
     end
 
+    # Raw request
+    #
+    def request(path, method, data = {})
+      case method.upcase
+      when 'PUT'
+        self.class.put(path, :body => data.to_json)
+      when 'GET'
+        self.class.get(path)
+      when 'POST'
+        self.class.post(path, :body => data.to_json)
+      when 'DELETE'
+        self.class.delete(path)
+      when 'OPTIONS'
+        self.class.options(path)
+      when 'HEAD'
+        self.class.head(path)
+      when 'MOVE'
+        self.class.move(path, :body => data.to_json)
+      when 'COPY'
+        self.class.copy(path, :body => data.to_json)
+      when 'PATCH'
+        self.class.copy(path, :body => data.to_json)
+      else
+        raise HTTPBadRequest
+      end
+    end
+
+    # Make batch requests
+    def batch
+
+    end
     # Calls http PUT on path
     #
     # @params [String]path Url path

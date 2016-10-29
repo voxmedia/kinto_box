@@ -211,6 +211,11 @@ class KintoBoxTest < Minitest::Test
     record2.delete
   end
 
+  def test_raw_get
+    resp = default_kinto_client.request('/buckets/TestBucket1', 'GET')
+    assert_equal JSON.parse(resp.body)['data']['id'], 'TestBucket1'
+  end
+
 
   private
 
