@@ -197,9 +197,11 @@ class KintoBoxTest < Minitest::Test
   end
 
   def test_sort_records
+    test_collection.delete_records
     record1 = test_collection.create_record({'val' => 10})
     record2 = test_collection.create_record({'val' => 11})
     records = test_collection.list_records(nil, 'val')
+
     assert_equal records['data'][0]['val'], 10
     assert_equal records['data'][1]['val'], 11
 
@@ -216,6 +218,35 @@ class KintoBoxTest < Minitest::Test
     assert_equal JSON.parse(resp.body)['data']['id'], 'TestBucket1'
   end
 
+
+  def test_batch_request
+    test_collection.delete_records
+    record = test_collection.create_record({'val' => random_string})
+    value = random_string
+    resp = default_kinto_client
+                .create_batch_request
+                .add_request(test_collection.create_record_request({'val' => value}))
+                .add_request(test_collection.create_record_request({'val' => random_string}))
+                .add_request(test_collection.delete_records_request("val=#{value}"))
+                .add_request(test_collection.count_records_request)
+                .add_request(record.delete_request)
+                .add_request(test_collection.count_records_request)
+                .send
+
+    assert_equal 6, resp['responses'].length
+    assert_equal 2, resp['responses'][3]['headers']['Total-Records'].to_i
+    assert_equal 1, resp['responses'][5]['headers']['Total-Records'].to_i
+  end
+
+  def test_batch_request_2
+    value = random_string
+    resp = default_kinto_client
+               .create_batch_request
+               .add_request(test_bucket.create_collection_request({'id' => value}))
+               .send
+    assert_equal 1, resp['responses'].length
+    assert_equal 201, resp['responses'][0]['status']
+  end
 
   private
 

@@ -112,9 +112,11 @@ module KintoBox
     end
 
     # Make batch requests
-    def batch
-
+    def create_batch_request
+        KintoBatchRequest.new(self)
     end
+
+
     # Calls http PUT on path
     #
     # @params [String]path Url path

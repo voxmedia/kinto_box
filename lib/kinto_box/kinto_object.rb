@@ -25,6 +25,34 @@ module KintoBox
       true
     end
 
+    def info_request
+      KintoRequest.new('GET', @url_path)
+    end
+
+    def update_request(data)
+      KintoRequest.new('PATCH', @url_path, {'data' => data})
+    end
+
+    def delete_request
+      KintoRequest.new('DELETE', @url_path)
+    end
+
+    def create_child_request(data)
+      KintoRequest.new('POST', url_w_qsp, { 'data' => data})
+    end
+
+    def list_children_request(filters = nil, sort = nil)
+      KintoRequest.new('GET', url_w_qsp(filters, sort))
+    end
+
+    def delete_children_request(filters = nil)
+      KintoRequest.new('DELETE', url_w_qsp(filters))
+    end
+
+    def count_children_request(filters = nil)
+      KintoRequest.new('HEAD',  url_w_qsp(filters))
+    end
+
     def add_permission(principal, permission)
       @kinto_client.patch(@url_path, {'permissions' => { permission => [principal_name(principal)] }})
       self
@@ -38,6 +66,7 @@ module KintoBox
     def permissions
       info['permissions']
     end
+
 
     private
 
@@ -54,13 +83,13 @@ module KintoBox
       end
     end
 
-    def url_w_qsp(filters = nil, sort = nil)
-      url = @child_path.nil? ? @url_path : @url_path + @child_path
-      query_string = '?'
-      query_string += filters unless filters.nil?
-      query_string += '&' unless filters.nil? || sort.nil?
-      query_string += "_sort=#{sort}" unless sort.nil?
-      query_string == '?' ? "#{url}" : "#{url}#{query_string}"
+    def url_w_qsp(filters = nil, sort = nil, add_child = true)
+      url = @child_path.nil? || !add_child ? @url_path : "#{@url_path}#{@child_path}"
+      query_string = ''
+      query_string = filters unless filters.nil?
+      query_string = "#{query_string}&" unless filters.nil? || sort.nil?
+      query_string = "#{query_string}_sort=#{sort}" unless sort.nil?
+      query_string == '' ? url : "#{url}?#{query_string}"
     end
   end
 end

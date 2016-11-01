@@ -1,8 +1,10 @@
 require 'kinto_box/kinto_record'
 require 'kinto_box/kinto_object'
+require 'kinto_box/kinto_batch_request'
 
 module KintoBox
   class KintoCollection < KintoObject
+
 
     attr_reader :bucket
 
@@ -40,5 +42,11 @@ module KintoBox
     def count_records(filters = nil)
       @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
     end
+
+
+    alias_method :create_record_request, :create_child_request
+    alias_method :list_records_request, :list_children_request
+    alias_method :delete_records_request, :delete_children_request
+    alias_method :count_records_request, :count_children_request
   end
 end

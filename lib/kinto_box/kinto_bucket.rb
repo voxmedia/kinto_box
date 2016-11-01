@@ -53,5 +53,10 @@ module KintoBox
     def count_collections(filters = nil)
       @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
     end
+
+    alias_method :create_collection_request, :create_child_request
+    alias_method :list_collection_request, :list_children_request
+    alias_method :delete_collections_request, :delete_children_request
+    alias_method :count_collections_request, :count_children_request
   end
 end
