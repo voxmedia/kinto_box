@@ -162,7 +162,7 @@ class KintoBoxTest < Minitest::Test
     assert_empty test_collection.list_records['data']
   end
 
-  def test_filtered_delete
+  def test_filtered_record_delete
     foo_val = random_string
     test_collection.create_record({'foo' => foo_val})
     test_collection.create_record({'foo' => foo_val})
@@ -199,7 +199,7 @@ class KintoBoxTest < Minitest::Test
   def test_sort_records
     record1 = test_collection.create_record({'val' => 10})
     record2 = test_collection.create_record({'val' => 11})
-    records = test_collection.list_records(nil,"val")
+    records = test_collection.list_records(nil, 'val')
     assert_equal records['data'][0]['val'], 10
     assert_equal records['data'][1]['val'], 11
 

@@ -1,5 +1,9 @@
 module KintoBox
-  module KintoObject
+  class KintoObject
+
+    attr_accessor :id
+    attr_reader :url_path
+
     def info
       @kinto_client.get(@url_path)
     end
@@ -23,12 +27,12 @@ module KintoBox
 
     def add_permission(principal, permission)
       @kinto_client.patch(@url_path, {'permissions' => { permission => [principal_name(principal)] }})
-      return self
+      self
     end
 
     def replace_permission(principal, permission)
       @kinto_client.put(@url_path, {'permissions' => { permission => [principal_name(principal)] }})
-      return self
+      self
     end
 
     def permissions
@@ -48,6 +52,15 @@ module KintoBox
         else
           return principal
       end
+    end
+
+    def url_w_qsp(filters = nil, sort = nil)
+      url = @child_path.nil? ? @url_path : @url_path + @child_path
+      query_string = '?'
+      query_string += filters unless filters.nil?
+      query_string += '&' unless filters.nil? || sort.nil?
+      query_string += "_sort=#{sort}" unless sort.nil?
+      query_string == '?' ? "#{url}" : "#{url}#{query_string}"
     end
   end
 end

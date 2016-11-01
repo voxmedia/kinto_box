@@ -2,10 +2,8 @@ require 'kinto_box/kinto_record'
 require 'kinto_box/kinto_object'
 
 module KintoBox
-  class KintoCollection
-    include KintoObject
+  class KintoCollection < KintoObject
 
-    attr_accessor :id
     attr_reader :bucket
 
     def initialize (bucket, collection_id)
@@ -14,11 +12,11 @@ module KintoBox
       @bucket = bucket
       @id = collection_id
       @url_path = "/buckets/#{bucket.id}/collections/#{@id}"
+      @child_path = '/records'
     end
 
     def record (record_id)
-      record = KintoRecord.new(self, record_id)
-      record
+      KintoRecord.new(self, record_id)
     end
 
 
@@ -27,9 +25,8 @@ module KintoBox
     end
 
 
-
     def create_record(data)
-      resp = @kinto_client.post("#{@url_path}/records", { 'data' => data})
+      resp = @kinto_client.post("#{@url_path}#{@child_path}", { 'data' => data})
       record_id = resp['data']['id']
       record(record_id)
     end
@@ -42,15 +39,6 @@ module KintoBox
 
     def count_records(filters = nil)
       @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
-    end
-
-    private
-    def url_w_qsp(filters = nil, sort = nil)
-      query_string = '?'
-      query_string += filters unless filters.nil?
-      query_string += '&' unless filters.nil? || sort.nil?
-      query_string += "_sort=#{sort}" unless sort.nil?
-      query_string == '?' ? "#{@url_path}/records" : "#{@url_path}/records#{query_string}"
     end
   end
 end

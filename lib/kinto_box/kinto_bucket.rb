@@ -2,10 +2,8 @@ require 'kinto_box/kinto_collection'
 require 'kinto_box/kinto_object'
 require 'kinto_box/kinto_group'
 module KintoBox
-  class KintoBucket
-    include KintoObject
+  class KintoBucket < KintoObject
 
-    attr_accessor :id
     attr_reader :kinto_client
 
     def initialize (client, bucket_id)
@@ -14,10 +12,11 @@ module KintoBox
       @kinto_client = client
       @id = bucket_id
       @url_path = "/buckets/#{@id}"
+      @child_path = '/collections'
     end
 
-    def list_collections
-      @kinto_client.get("#{@url_path}/collections")
+    def list_collections(filters = nil, sort = nil)
+      @kinto_client.get(url_w_qsp(filters, sort))
     end
 
     def list_groups
@@ -26,16 +25,14 @@ module KintoBox
 
     def collection (collection_id)
       @collection = KintoCollection.new(self, collection_id)
-      @collection
     end
 
     def group(group_id)
       @group = KintoGroup.new(self, group_id)
-      @group
     end
 
     def create_collection(collection_id)
-      @kinto_client.post("#{@url_path}/collections", { 'data' => { 'id' => collection_id}})
+      @kinto_client.post("#{@url_path}#{@child_path}", { 'data' => { 'id' => collection_id}})
       collection(collection_id)
     end
 
@@ -46,7 +43,15 @@ module KintoBox
     end
 
     def delete_collections
-      @kinto_client.delete("#{@url_path}/collections")
+      @kinto_client.delete(url_w_qsp)
+    end
+
+    def delete_groups
+      @kinto_client.delete("#{@url_path}/groups")
+    end
+
+    def count_collections(filters = nil)
+      @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
     end
   end
 end

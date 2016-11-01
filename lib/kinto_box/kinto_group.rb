@@ -1,8 +1,7 @@
 require 'kinto_box/kinto_object'
 
 module KintoBox
-  class KintoGroup
-    include KintoObject
+  class KintoGroup < KintoObject
 
     attr_accessor :id
     attr_reader :bucket
