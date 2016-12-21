@@ -1,19 +1,23 @@
-require "kinto_box/version"
 require 'httparty'
-require 'kinto_box/response_handler'
-require 'kinto_box/kinto_bucket'
 require 'base64'
 
-module KintoBox
+require 'kinto_box/version'
+require 'kinto_box/errors'
+require 'kinto_box/kinto_server'
+require 'kinto_box/kinto_batch_request'
 
+module KintoBox
   # Initializes a new Kinto client.
   #
   # @param [String] server Url of the server without the version
-  # @param [Hash] options Optional parameter. If the hash contains :username and :password, it will be used to authenticate.
-  # `options` parameter can be used to pass in credentials. If no credentials are passed, it looks for KINTO_API_TOKEN environment variable
+  # @param [Hash] options Optional parameter. If the hash contains :username
+  #                       and :password, it will be used to authenticate.
+  #                       `options` parameter Can be used to pass in
+  #                       credentials. If no credentials are passed, it looks
+  #                       for KINTO_API_TOKEN environment variable.
   # @return [KintoBox::KintoClient] A kinto client object
-  def KintoBox.new(server, options = nil)
-    return KintoClient.new(server, options)
+  def self.new(*args, **kwargs, &blk)
+    KintoClient.new(*args, **kwargs, &blk)
   end
 
   class KintoClient
@@ -24,49 +28,53 @@ module KintoBox
     # Initializes a new Kinto client.
     #
     # @param [String] server Url of the server without the version
-    # @param [Hash] options Optional parameter. If the hash contains :username and :password, it will be used to authenticate.
-    # `options` parameter can be used to pass in credentials. If no credentials are passed, it looks for KINTO_API_TOKEN environment variable
+    # @param [Hash] options Optional parameter. If the hash contains :username
+    #                       and :password, it will be used to authenticate.
+    #                       `options` parameter Can be used to pass in
+    #                       credentials. If no credentials are passed, it looks
+    #                       for KINTO_API_TOKEN environment variable.
     # @return [KintoBox::KintoClient] A kinto client object
-    def initialize(server, options = nil)
-      @server = server
-      self.class.base_uri URI.join(@server, '/v1/').to_s
+    def initialize(server, username: nil, password: nil)
+      self.class.base_uri(URI.join(server, '/v1/').to_s)
 
-      unless options.nil? || options[:username].nil? || options[:password].nil?
-        @auth = Base64.encode64("#{options[:username]}:#{options[:password]}")
-      end
+      auth = if username && password
+               Base64.encode64("#{username}:#{password}")
+             else
+               ENV['KINTO_API_TOKEN']
+             end
 
-      @auth = ENV['KINTO_API_TOKEN'] if @auth.nil?
-      self.class.headers('Authorization' => "Basic #{@auth}")
+      self.class.headers('Authorization' => "Basic #{auth}")
+
+      @server = KintoServer.new(client: self)
     end
 
     # Get reference to a bucket
     #
     # @param [String] bucket_id The id of the bucket
     # @return [KintoBox::KintoBucket] A kinto bucket object
-    def bucket (bucket_id)
-      @bucket = KintoBucket.new(self, bucket_id)
-      @bucket
+    def bucket(bucket_id)
+      @server.bucket(bucket_id)
     end
 
     # Get server information
     #
     # @return [Hash] Server info as a hash
     def server_info
-      get '/'
+      @server.info
     end
 
     # Get current user id
     #
     # @return [String] current user id
     def current_user_id
-      server_info['user']['id']
+      @server.current_user_id
     end
 
     # List of buckets
     #
     # @return [Hash] with list of buckets
     def list_buckets
-      get '/buckets'
+      @server.list_buckets
     end
 
     # Create a bucket
@@ -74,48 +82,14 @@ module KintoBox
     # @param [String] bucket_id The id of the bucket
     # @return [KintoBox::KintoBucket] A kinto bucket object
     def create_bucket(bucket_id)
-      put "/buckets/#{bucket_id}"
-      bucket(bucket_id)
+      @server.create_bucket(bucket_id)
     end
 
     # Delete all buckets
-    #
+    # @return [Hash] API response
     def delete_buckets
-      delete '/buckets'
+      @server.delete_buckets
     end
-
-    # Raw request
-    #
-    def request(path, method, data = {})
-      case method.upcase
-      when 'PUT'
-        self.class.put(path, :body => data.to_json)
-      when 'GET'
-        self.class.get(path)
-      when 'POST'
-        self.class.post(path, :body => data.to_json)
-      when 'DELETE'
-        self.class.delete(path)
-      when 'OPTIONS'
-        self.class.options(path)
-      when 'HEAD'
-        self.class.head(path)
-      when 'MOVE'
-        self.class.move(path, :body => data.to_json)
-      when 'COPY'
-        self.class.copy(path, :body => data.to_json)
-      when 'PATCH'
-        self.class.copy(path, :body => data.to_json)
-      else
-        raise HTTPBadRequest
-      end
-    end
-
-    # Make batch requests
-    def create_batch_request
-        KintoBatchRequest.new(self)
-    end
-
 
     # Calls http PUT on path
     #
@@ -123,7 +97,7 @@ module KintoBox
     # @params [Hash] data to be sent in the body
     # @return [Hash] response body
     def put(path, data = {})
-      ResponseHandler.handle self.class.put(path, :body => data.to_json)
+      request 'PUT', path, body: data.to_json
     end
 
     # Calls http POST on path
@@ -132,7 +106,7 @@ module KintoBox
     # @params [Hash] data to be sent in the body
     # @return [Hash] response body
     def post(path, data = {})
-      ResponseHandler.handle self.class.post(path, :body => data.to_json)
+      request 'POST', path, body: data.to_json
     end
 
     # Calls http PATCH on path
@@ -141,34 +115,113 @@ module KintoBox
     # @params [Hash] data to be sent in the body
     # @return [Hash] response body
     def patch(path, data)
-      ResponseHandler.handle self.class.patch(path, :body => data.to_json)
+      request 'PATCH', path, body: data.to_json
     end
 
     # Calls http DELETE on path
     #
     # @params [String]path Url path
-    # @params [Hash] data to be sent in the body
     # @return [Hash] response body
     def delete(path)
-      ResponseHandler.handle self.class.delete(path)
+      request 'DELETE', path
     end
 
     # Calls http GET on path
     #
     # @params [String]path Url path
-    # @params [Hash] data to be sent in the body
     # @return [Hash] response body
     def get(path)
-      ResponseHandler.handle self.class.get(path)
+      request 'GET', path
     end
 
     # Calls http HEAD on path
     #
     # @params [String]path Url path
-    # @params [Hash] data to be sent in the body
     # @return [Hash] response body
-    def head(path, data = {})
-      ResponseHandler.get_response_head self.class.head(path)
+    def head(path)
+      request 'HEAD', path
+    end
+
+    # Get a request object
+    # @param [String] method
+    # @param [String] path
+    # @param [Hash] body
+    # @return [KintoRequest] Request object
+    def create_request(method, path, body = {})
+      KintoRequest.new self, method, path, body
+    end
+
+    # Make batch requests
+    # @return [KintoBatchRequest] New back request object
+    def create_batch_request
+      KintoBatchRequest.new self
+    end
+
+    # Make batch requests
+    #   results = client.batch do req
+    #               req.add_request(...)
+    #             end
+    def batch
+      req = create_batch_request
+      if block_given?
+        yield req
+        req.execute
+      else
+        req
+      end
+    end
+
+    # Send a prepared request
+    # @param [KintoRequest] request
+    # @return [Hash] response
+    def send_request(request_obj)
+      request(request_obj.method, request_obj.path, body: request_obj.body.to_json)
+    end
+
+    private
+
+    # Handle all the kinds of requests
+    #
+    # @param [String] HTTP method
+    # @param [String] Path to query
+    # @return [Hash] Return data
+    def request(method, path, **kwargs)
+      verbs = %w(put get post delete options head move copy patch)
+      method = method.to_s.downcase
+      raise HTTPBadRequest("Unsupported HTTP method #{method}") unless verbs.include?(method)
+      resp = self.class.send(method.to_sym, path, **kwargs)
+      if method == 'head'
+        handle_response resp, head_instead: true
+      else
+        handle_response resp
+      end
+    end
+
+    # Parse and process HTTP response. Check for codes, and parse return body.
+    # @param [Object] Response object
+    # @param [Boolean] <head_instead> Return headers instead of body
+    # @return [Hash] Response payload
+    def handle_response(resp, head_instead: false)
+      case resp.code
+      when 200, 201
+        head_instead ? resp.headers : JSON.parse(resp.body)
+      when 202, 204
+        true
+      when 400
+        raise BadRequest, resp
+      when 401
+        raise NotAllowed, resp
+      when 403
+        raise NotAuthorized, resp
+      when 404
+        raise NotFound, resp
+      else
+        if resp.code >= 500
+          raise ServerError, resp
+        else
+          raise Error, resp
+        end
+      end
     end
   end
 end

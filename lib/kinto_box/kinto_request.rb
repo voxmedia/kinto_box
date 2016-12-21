@@ -1,18 +1,21 @@
 module KintoBox
   class KintoRequest
+    attr_reader :method, :path, :body, :headers
 
-    def initialize(method = 'GET', path = nil , body = {}, headers = nil)
+    def initialize(client, method, path, body = {}, headers: nil)
+      @client = client
       @method = method
       @path = path
       @body = body
       @headers = headers
     end
 
-    def hashed_object
-      { 'method' => @method,
-        'path' => @path,
-        'body' => @body
-      }
+    def to_hash
+      { 'method' => method, 'path' => path, 'body' => body }
+    end
+
+    def execute
+      @client.send_request(self)
     end
   end
 end

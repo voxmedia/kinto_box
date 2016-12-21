@@ -1,62 +1,40 @@
 require 'kinto_box/kinto_collection'
-require 'kinto_box/kinto_object'
 require 'kinto_box/kinto_group'
 module KintoBox
   class KintoBucket < KintoObject
+    child_class KintoCollection
 
-    attr_reader :kinto_client
+    alias_method :collection, :child
 
-    def initialize (client, bucket_id)
-      raise ArgumentError if bucket_id.nil? || client.nil?
+    alias_method :list_collections, :list_children
+    alias_method :delete_collections, :delete_children
+    alias_method :count_collections, :count_children
 
-      @kinto_client = client
-      @id = bucket_id
-      @url_path = "/buckets/#{@id}"
-      @child_path = '/collections'
-    end
+    alias_method :create_collection_request, :create_child_request
+    alias_method :list_collections_request, :list_children_request
+    alias_method :delete_collections_request, :delete_children_request
+    alias_method :count_collections_request, :count_children_request
 
-    def list_collections(filters = nil, sort = nil)
-      @kinto_client.get(url_w_qsp(filters, sort))
+    def group(group_id)
+      KintoGroup.new(id: group_id, parent: self)
     end
 
     def list_groups
-      @kinto_client.get("#{@url_path}/groups")
-    end
-
-    def collection (collection_id)
-      @collection = KintoCollection.new(self, collection_id)
-    end
-
-    def group(group_id)
-      @group = KintoGroup.new(self, group_id)
-    end
-
-    def create_collection(collection_id)
-      @kinto_client.post("#{@url_path}#{@child_path}", { 'data' => { 'id' => collection_id}})
-      collection(collection_id)
+      @client.get("#{url_path}/groups")
     end
 
     def create_group(group_id, members)
       members = [members] unless members.is_a?(Array)
-      @kinto_client.put("#{@url_path}/groups/#{group_id}", { 'data' => { 'members' => members}})
-      group(group_id)
-    end
-
-    def delete_collections
-      @kinto_client.delete(url_w_qsp)
+      resp = @client.put("#{url_path}/groups/#{group_id}", 'data' => { 'members' => members })
+      KintoGroup.new(parent: self, info: resp)
     end
 
     def delete_groups
-      @kinto_client.delete("#{@url_path}/groups")
+      @client.delete("#{url_path}/groups")
     end
 
-    def count_collections(filters = nil)
-      @kinto_client.head(url_w_qsp(filters))['Total-Records'].to_i
+    def create_collection(id)
+      create_child(id: id)
     end
-
-    alias_method :create_collection_request, :create_child_request
-    alias_method :list_collection_request, :list_children_request
-    alias_method :delete_collections_request, :delete_children_request
-    alias_method :count_collections_request, :count_children_request
   end
 end
