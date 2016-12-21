@@ -59,6 +59,11 @@ module KintoBox
       @info ||= info_request.execute
     end
 
+    # Delete the cached info for this object
+    def reload
+      @info = nil
+    end
+
     # Delete this object
     # @return [Hash] Response
     def delete
